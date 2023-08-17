@@ -22,6 +22,7 @@ pluginManagement {
         id "io.sentry.android.gradle" version gradle.ext.sentryVersion
         id "io.gitlab.arturbosch.detekt" version gradle.ext.detektVersion
         id "se.bjurr.violations.violation-comments-to-github-gradle-plugin" version gradle.ext.violationCommentsVersion
+        id "com.openmobilehub.android.omh-core" version "1.0.4.-beta"
     }
     repositories {
         maven {
@@ -31,6 +32,7 @@ pluginManagement {
             }
         }
         gradlePluginPortal()
+        mavenCentral()
         google()
     }
     resolutionStrategy {

@@ -296,6 +296,14 @@ android {
     packagingOptions {
         // MPAndroidChart uses androidX - remove this line when we migrate everything to androidX
         exclude 'META-INF/proguard/androidx-annotations.pro'
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'xsd/catalog.xml'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/INDEX.LIST'
 
         // Exclude React Native's JSC and Fabric JNI
         exclude '**/libjscexecutor.so'
@@ -472,6 +480,13 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$gradle.ext.daggerVersion"
     implementation "com.google.dagger:hilt-android:$gradle.ext.daggerVersion"
     kapt "com.google.dagger:hilt-compiler:$gradle.ext.daggerVersion"
+    implementation("com.openmobilehub.android:omh-core:1.0.4-beta") {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-compiler-embeddable'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-gradle-plugin'
+        exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+        exclude group: 'net.java.dev.jna', module: 'jna'
+        exclude group: 'com.google.crypto.tink', module: 'tink'
+    }
 
     testImplementation "$gradle.ext.storiesAndroidPhotoEditorPath:$automatticStoriesVersion"
 
