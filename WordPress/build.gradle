@@ -355,6 +355,8 @@ kapt {
     correctErrorTypes true
 }
 
+def ngmsImplementation = configurations
+
 dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     compileOnly project(path: ':libs:annotations')
@@ -568,14 +570,10 @@ dependencies {
     // - Jetpack Compose - UI Tests
     androidTestImplementation "androidx.compose.ui:ui-test-junit4"
     implementation "androidx.compose.material3:material3:$androidxComposeMaterial3Version"
-}
 
-configurations.all {
-    // Exclude packaged wordpress sub projects, force the use of the source project
-    // (eg. use :libs:utils:WordPressUtils instead of 'org.wordpress:utils')
-    exclude group: 'org.wordpress', module: 'analytics'
+    ngmsImplementation(Dependencies.omhNonGmsAuthLibrary)
+    ngmsImplementation(Dependencies.omhGmsAuthLibrary)
 }
-
 
 // If Google services file doesn't exist, copy example file
 if (!file("google-services.json").exists()) {
