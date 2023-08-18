@@ -180,7 +180,7 @@ class SupportWebViewActivity : WPWebViewActivity(), SupportWebViewClient.Support
             .authority(DEFAULT_DOMAIN)
             .appendPath("assets")
             .appendPath("support_chat_widget.html")
-            .appendQueryParameter("id", BuildConfig.DOCSBOTAI_ID)
+            .appendQueryParameter("id", "TqTdebbGjJeUjrmBIFjh/YbAMwiheXLs2Ue5j7elH" /*BuildConfig.DOCSBOTAI_ID*/)
             .appendQueryParameter("inputPlaceholder", context.getString(R.string.contact_support_input_placeholder))
             .appendQueryParameter("firstMessage", context.getString(R.string.contact_support_first_message))
             .appendQueryParameter("getSupport", context.getString(R.string.contact_support_get_support))
