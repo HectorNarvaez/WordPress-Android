@@ -48,3 +48,4 @@ wp.e2e.signup_email=e2eflowsignuptestingmobile@example.com
 wp.e2e.signup_username=e2eflowsignuptestingmobile
 wp.e2e.signup_display_name=e2eflowsignuptestingmobile
 wp.e2e.signup_password=mocked_password
+wp.client_id=456456564-vfw345f345wfw345fw345f345.apps.googleusercontent.com

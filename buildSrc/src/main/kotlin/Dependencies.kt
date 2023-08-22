@@ -1,6 +1,6 @@
 object Versions {
     // Auth
-    const val omhAuth = "1.0.0-beta"
+    const val omhAuth = "1.0"
 }
 
 object Dependencies {

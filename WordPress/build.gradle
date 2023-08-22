@@ -183,9 +183,51 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    flavorDimensions "app", "buildType"
+    flavorDimensions "app", "buildType", 'omh'
 
     productFlavors {
+        gms {
+            dimension 'omh'
+
+            applicationId "org.wordpress.android"
+            buildConfigField "boolean", "IS_JETPACK_APP", "false"
+            buildConfigField "String", "TRACKS_EVENT_PREFIX", '"wpandroid_"'
+            buildConfigField "String", "PUSH_NOTIFICATIONS_APP_KEY", '"org.wordpress.android"'
+            buildConfigField "boolean", "ENABLE_QRCODE_AUTH_FLOW", "false"
+            buildConfigField "boolean", "ENABLE_OPEN_WEB_LINKS_WITH_JP_FLOW", "true"
+            buildConfigField "boolean", "ENABLE_SITE_CREATION_DOMAIN_PURCHASING", "false"
+
+            manifestPlaceholders = [magicLinkScheme:"wordpress"]
+        }
+
+        nongms {
+            dimension 'omh'
+
+            applicationId "org.wordpress.android"
+            buildConfigField "boolean", "IS_JETPACK_APP", "false"
+            buildConfigField "String", "TRACKS_EVENT_PREFIX", '"wpandroid_"'
+            buildConfigField "String", "PUSH_NOTIFICATIONS_APP_KEY", '"org.wordpress.android"'
+            buildConfigField "boolean", "ENABLE_QRCODE_AUTH_FLOW", "false"
+            buildConfigField "boolean", "ENABLE_OPEN_WEB_LINKS_WITH_JP_FLOW", "true"
+            buildConfigField "boolean", "ENABLE_SITE_CREATION_DOMAIN_PURCHASING", "false"
+
+            manifestPlaceholders = [magicLinkScheme:"wordpress"]
+        }
+
+        singleBuild {
+            dimension 'omh'
+
+            applicationId "org.wordpress.android"
+            buildConfigField "boolean", "IS_JETPACK_APP", "false"
+            buildConfigField "String", "TRACKS_EVENT_PREFIX", '"wpandroid_"'
+            buildConfigField "String", "PUSH_NOTIFICATIONS_APP_KEY", '"org.wordpress.android"'
+            buildConfigField "boolean", "ENABLE_QRCODE_AUTH_FLOW", "false"
+            buildConfigField "boolean", "ENABLE_OPEN_WEB_LINKS_WITH_JP_FLOW", "true"
+            buildConfigField "boolean", "ENABLE_SITE_CREATION_DOMAIN_PURCHASING", "false"
+
+            manifestPlaceholders = [magicLinkScheme:"wordpress"]
+        }
+
         wordpress {
             isDefault true
             dimension "app"
@@ -300,6 +342,8 @@ android {
         // Exclude React Native's JSC and Fabric JNI
         exclude '**/libjscexecutor.so'
         exclude '**/libfabricjni.so'
+
+        exclude 'META-INF/DEPENDENCIES'
 
         // Avoid React Native's JNI duplicated classes
         pickFirst '**/libc++_shared.so'
@@ -571,8 +615,10 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4"
     implementation "androidx.compose.material3:material3:$androidxComposeMaterial3Version"
 
-    ngmsImplementation(Dependencies.omhNonGmsAuthLibrary)
-    ngmsImplementation(Dependencies.omhGmsAuthLibrary)
+    gmsImplementation 'com.openmobilehub.android:auth-api-gms:1.0'
+    nongmsImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
+    singleBuildImplementation 'com.openmobilehub.android:auth-api-gms:1.0'
+    singleBuildImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
 }
 
 // If Google services file doesn't exist, copy example file
