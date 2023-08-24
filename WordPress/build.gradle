@@ -399,8 +399,6 @@ kapt {
     correctErrorTypes true
 }
 
-def ngmsImplementation = configurations
-
 dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     compileOnly project(path: ':libs:annotations')
@@ -619,6 +617,12 @@ dependencies {
     nongmsImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
     singleBuildImplementation 'com.openmobilehub.android:auth-api-gms:1.0'
     singleBuildImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
+}
+
+configurations.all {
+    // Exclude packaged wordpress sub projects, force the use of the source project
+    // (eg. use :libs:utils:WordPressUtils instead of 'org.wordpress:utils')
+    exclude group: 'org.wordpress', module: 'analytics'
 }
 
 // If Google services file doesn't exist, copy example file

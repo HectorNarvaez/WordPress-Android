@@ -2,6 +2,7 @@
 
 package org.wordpress.android.ui.main
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
@@ -20,6 +21,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.omh.android.auth.api.OmhAuthClient
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCrop.Options
 import com.yalantis.ucrop.UCropActivity
@@ -139,6 +141,9 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
 
     @Inject
     lateinit var jetpackFeatureRemovalUtils: JetpackFeatureRemovalOverlayUtil
+
+    @Inject
+    lateinit var omhAuthClient: OmhAuthClient
 
     private val viewModel: MeViewModel by viewModels()
 
@@ -388,13 +393,15 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
         binding = null
     }
 
+    @SuppressLint("SetTextI18n")
     private fun MeFragmentBinding.refreshAccountDetails() {
-        if (!FluxCUtils.isSignedInWPComOrHasWPOrgSite(accountStore, siteStore)) {
-            return
-        }
+        // if (!FluxCUtils.isSignedInWPComOrHasWPOrgSite(accountStore, siteStore)) {
+        //    return
+        // }
         // we only want to show user details for WordPress.com users
-        if (accountStore.hasAccessToken()) {
-            val defaultAccount = accountStore.account
+        if (omhAuthClient.getUser() != null) {
+            val profile = requireNotNull(omhAuthClient.getUser())
+            // val defaultAccount = accountStore.account
             meDisplayName.visibility = View.VISIBLE
             meUsername.visibility = View.VISIBLE
             cardAvatar.visibility = View.VISIBLE
@@ -402,9 +409,9 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
             myProfileDivider.visibility = View.VISIBLE
             accountSettingsDivider.visibility = View.VISIBLE
             loadAvatar(null)
-            meUsername.text = getString(R.string.at_username, defaultAccount.userName)
+            meUsername.text = getString(R.string.at_username, profile.email)
             meLoginLogoutTextView.setText(R.string.me_disconnect_from_wordpress_com)
-            meDisplayName.text = defaultAccount.displayName.ifEmpty { defaultAccount.userName }
+            meDisplayName.text = "${profile.name} ${profile.surname}"
         } else {
             meDisplayName.visibility = View.GONE
             meUsername.visibility = View.GONE

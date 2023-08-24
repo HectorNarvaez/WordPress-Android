@@ -6,8 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,6 +21,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.omh.android.auth.api.OmhAuthClient;
+import com.omh.android.auth.api.models.OmhAuthException;
 
 import org.wordpress.android.R;
 import org.wordpress.android.analytics.AnalyticsTracker;
@@ -59,8 +65,10 @@ import org.wordpress.android.ui.accounts.UnifiedLoginTracker.Source;
 import org.wordpress.android.ui.accounts.login.LoginPrologueFragment;
 import org.wordpress.android.ui.accounts.login.LoginPrologueListener;
 import org.wordpress.android.ui.accounts.login.LoginPrologueRevampedFragment;
+import org.wordpress.android.ui.accounts.login.compose.DetailsFragment;
 import org.wordpress.android.ui.accounts.login.jetpack.LoginNoSitesFragment;
 import org.wordpress.android.ui.accounts.login.jetpack.LoginSiteCheckErrorFragment;
+import org.wordpress.android.ui.main.MeFragment;
 import org.wordpress.android.ui.main.SitePickerActivity;
 import org.wordpress.android.ui.notifications.services.NotificationsUpdateServiceStarter;
 import org.wordpress.android.ui.posts.BasicFragmentDialog;
@@ -143,6 +151,11 @@ public class LoginActivity extends LocaleAwareActivity implements ConnectionCall
 
     @Inject ContactSupportFeatureConfig mContactSupportFeatureConfig;
 
+    @Inject OmhAuthClient mOmhAuthClient;
+    private final ActivityResultLauncher<Intent>
+            mLoginLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            this::handleLoginResult);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -215,6 +228,10 @@ public class LoginActivity extends LocaleAwareActivity implements ConnectionCall
         }
 
         initViewModel();
+
+        if (mOmhAuthClient.getUser() != null) {
+            navigateToLoggedIn();
+        }
     }
 
     private void initViewModel() {
@@ -457,7 +474,8 @@ public class LoginActivity extends LocaleAwareActivity implements ConnectionCall
             }
         } else {
             // prologue fragment is shown so, slide in the email screen (and add to history)
-            slideInFragment(LoginEmailFragment.newInstance(mIsSignupFromLoginEnabled), true, LoginEmailFragment.TAG);
+            // slideInFragment(LoginEmailFragment.newInstance(mIsSignupFromLoginEnabled), true, LoginEmailFragment.TAG);
+            startOmhLogin();
         }
     }
 
@@ -991,5 +1009,36 @@ public class LoginActivity extends LocaleAwareActivity implements ConnectionCall
     private void showNoJetpackSites() {
         LoginNoSitesFragment fragment = LoginNoSitesFragment.Companion.newInstance();
         slideInFragment(fragment, false, LoginNoSitesFragment.TAG);
+    }
+
+    private void startOmhLogin() {
+        Intent loginIntent = mOmhAuthClient.getLoginIntent();
+        mLoginLauncher.launch(loginIntent);
+    }
+
+    private void handleLoginResult(ActivityResult result) {
+        try {
+            mOmhAuthClient.getAccountFromIntent(result.getData());
+            navigateToLoggedIn();
+        } catch (OmhAuthException exception) {
+            handleException(exception);
+        }
+    }
+
+    private void navigateToLoggedIn() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, new MeFragment());
+        transaction.disallowAddToBackStack();
+        transaction.commit();
+    }
+
+    private void handleException(OmhAuthException exception ) {
+        exception.printStackTrace();
+        new AlertDialog.Builder(this)
+                .setTitle("An error has occurred.")
+                .setMessage(exception.getMessage())
+                .setPositiveButton("Ok", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
     }
 }
