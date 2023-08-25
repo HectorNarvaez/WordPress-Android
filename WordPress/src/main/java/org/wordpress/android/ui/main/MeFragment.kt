@@ -430,8 +430,12 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
 
     private fun MeFragmentBinding.loadAvatar(injectFilePath: String?) {
         val newAvatarUploaded = injectFilePath != null && injectFilePath.isNotEmpty()
-        val profileImage = omhAuthClient.getUser()?.profileImage ?: accountStore.account.avatarUrl
-        val avatarUrl = meGravatarLoader.constructGravatarUrl(profileImage)
+        val avatarUrl = meGravatarLoader.constructGravatarUrl(accountStore.account.avatarUrl)
+
+        if (avatarUrl.isNullOrBlank()) {
+            return
+        }
+
         meGravatarLoader.load(
             newAvatarUploaded,
             avatarUrl,
