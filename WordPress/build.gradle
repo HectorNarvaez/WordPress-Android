@@ -613,10 +613,10 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4"
     implementation "androidx.compose.material3:material3:$androidxComposeMaterial3Version"
 
-    gmsImplementation 'com.openmobilehub.android:auth-api-gms:1.0'
-    nongmsImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
-    singleBuildImplementation 'com.openmobilehub.android:auth-api-gms:1.0'
-    singleBuildImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0'
+    gmsImplementation 'com.openmobilehub.android:auth-api-gms:1.0.1-beta'
+    nongmsImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0.1-beta'
+    singleBuildImplementation 'com.openmobilehub.android:auth-api-gms:1.0.1-beta'
+    singleBuildImplementation 'com.openmobilehub.android:auth-api-non-gms:1.0.1-beta'
 }
 
 configurations.all {
