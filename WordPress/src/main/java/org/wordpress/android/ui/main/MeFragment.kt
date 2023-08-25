@@ -2,7 +2,6 @@
 
 package org.wordpress.android.ui.main
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
@@ -14,6 +13,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
 import android.view.View.OnClickListener
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.omh.android.auth.api.OmhAuthClient
+import com.omh.android.auth.api.async.CancellableCollector
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCrop.Options
 import com.yalantis.ucrop.UCropActivity
@@ -68,7 +69,6 @@ import org.wordpress.android.ui.utils.UiString.UiStringText
 import org.wordpress.android.util.AppLog
 import org.wordpress.android.util.AppLog.T.MAIN
 import org.wordpress.android.util.AppLog.T.UTILS
-import org.wordpress.android.util.FluxCUtils
 import org.wordpress.android.util.JetpackBrandingUtils
 import org.wordpress.android.util.MediaUtils
 import org.wordpress.android.util.PackageManagerWrapper
@@ -147,6 +147,8 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
 
     private val viewModel: MeViewModel by viewModels()
 
+    private val cancellableCollector = CancellableCollector()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (requireActivity().application as WordPress).component().inject(this)
@@ -170,7 +172,7 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
                 setSupportActionBar(toolbarMain)
                 supportActionBar?.apply {
                     setHomeButtonEnabled(true)
-                    setDisplayHomeAsUpEnabled(true)
+                    setDisplayHomeAsUpEnabled(false)
                     // We need to set the title this way so it can be updated on locale change
                     setTitle(packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA).labelRes)
                 }
@@ -225,7 +227,7 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
         initRecommendUiState()
 
         rowLogout.setOnClickListener {
-            if (accountStore.hasAccessToken()) {
+            if (omhAuthClient.getUser() != null) {
                 signOutWordPressComWithConfirmation()
             } else {
                 if (BuildConfig.IS_JETPACK_APP) {
@@ -393,15 +395,11 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
         binding = null
     }
 
-    @SuppressLint("SetTextI18n")
     private fun MeFragmentBinding.refreshAccountDetails() {
-        // if (!FluxCUtils.isSignedInWPComOrHasWPOrgSite(accountStore, siteStore)) {
-        //    return
-        // }
         // we only want to show user details for WordPress.com users
         if (omhAuthClient.getUser() != null) {
             val profile = requireNotNull(omhAuthClient.getUser())
-            // val defaultAccount = accountStore.account
+            val userName = "${profile.name} ${profile.surname}"
             meDisplayName.visibility = View.VISIBLE
             meUsername.visibility = View.VISIBLE
             cardAvatar.visibility = View.VISIBLE
@@ -409,9 +407,9 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
             myProfileDivider.visibility = View.VISIBLE
             accountSettingsDivider.visibility = View.VISIBLE
             loadAvatar(null)
-            meUsername.text = getString(R.string.at_username, profile.email)
+            meUsername.text = profile.email
             meLoginLogoutTextView.setText(R.string.me_disconnect_from_wordpress_com)
-            meDisplayName.text = "${profile.name} ${profile.surname}"
+            meDisplayName.text = userName
         } else {
             meDisplayName.visibility = View.GONE
             meUsername.visibility = View.GONE
@@ -432,7 +430,8 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
 
     private fun MeFragmentBinding.loadAvatar(injectFilePath: String?) {
         val newAvatarUploaded = injectFilePath != null && injectFilePath.isNotEmpty()
-        val avatarUrl = meGravatarLoader.constructGravatarUrl(accountStore.account.avatarUrl)
+        val profileImage = omhAuthClient.getUser()?.profileImage ?: accountStore.account.avatarUrl
+        val avatarUrl = meGravatarLoader.constructGravatarUrl(profileImage)
         meGravatarLoader.load(
             newAvatarUploaded,
             avatarUrl,
@@ -504,7 +503,29 @@ class MeFragment : Fragment(R.layout.me_fragment), OnScrollToTopListener {
     }
 
     private fun signOutWordPressCom() {
-        viewModel.signOutWordPress(requireActivity().application as WordPress)
+        val cancellable = omhAuthClient.signOut()
+            .addOnSuccess { navigateToLogin() }
+            .addOnFailure(::showErrorDialog)
+            .execute()
+        cancellableCollector.addCancellable(cancellable)
+    }
+
+    private fun navigateToLogin() {
+        (activity?.application as? WordPress)?.let {
+            viewModel.signOutWordPress(it)
+            ActivityLauncher.showMainActivity(context, true)
+        }
+    }
+
+    private fun showErrorDialog(exception: Throwable) {
+        exception.printStackTrace()
+        val ctx = context ?: return
+        AlertDialog.Builder(ctx)
+            .setTitle("An error has occurred.")
+            .setMessage(exception.message)
+            .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
     }
 
     private fun clearNotifications() {

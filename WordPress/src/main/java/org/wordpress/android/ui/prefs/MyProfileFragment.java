@@ -9,6 +9,9 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import com.omh.android.auth.api.OmhAuthClient;
+import com.omh.android.auth.api.models.OmhUserProfile;
+
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.wordpress.android.R;
@@ -39,6 +42,8 @@ public class MyProfileFragment extends Fragment implements TextInputDialogFragme
 
     @Inject Dispatcher mDispatcher;
     @Inject AccountStore mAccountStore;
+
+    @Inject OmhAuthClient mOmhAuthClient;
 
     private static final String TRACK_PROPERTY_FIELD_NAME = "field_name";
     private static final String TRACK_PROPERTY_PAGE = "page";
@@ -119,8 +124,9 @@ public class MyProfileFragment extends Fragment implements TextInputDialogFragme
         }
 
         AccountModel account = mAccountStore.getAccount();
-        updateLabel(mFirstName, account != null ? account.getFirstName() : null);
-        updateLabel(mLastName, account != null ? account.getLastName() : null);
+        OmhUserProfile omhUserProfile = mOmhAuthClient.getUser();
+        updateLabel(mFirstName, omhUserProfile.getName());
+        updateLabel(mLastName, omhUserProfile.getSurname());
         updateLabel(mDisplayName, account != null ? account.getDisplayName() : null);
         updateLabel(mAboutMe, account != null ? account.getAboutMe() : null);
     }

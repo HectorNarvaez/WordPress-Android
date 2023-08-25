@@ -65,7 +65,6 @@ import org.wordpress.android.ui.accounts.UnifiedLoginTracker.Source;
 import org.wordpress.android.ui.accounts.login.LoginPrologueFragment;
 import org.wordpress.android.ui.accounts.login.LoginPrologueListener;
 import org.wordpress.android.ui.accounts.login.LoginPrologueRevampedFragment;
-import org.wordpress.android.ui.accounts.login.compose.DetailsFragment;
 import org.wordpress.android.ui.accounts.login.jetpack.LoginNoSitesFragment;
 import org.wordpress.android.ui.accounts.login.jetpack.LoginSiteCheckErrorFragment;
 import org.wordpress.android.ui.main.MeFragment;
