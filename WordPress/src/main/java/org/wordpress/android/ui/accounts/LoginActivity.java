@@ -473,7 +473,6 @@ public class LoginActivity extends LocaleAwareActivity implements ConnectionCall
             }
         } else {
             // prologue fragment is shown so, slide in the email screen (and add to history)
-            // slideInFragment(LoginEmailFragment.newInstance(mIsSignupFromLoginEnabled), true, LoginEmailFragment.TAG);
             startOmhLogin();
         }
     }
